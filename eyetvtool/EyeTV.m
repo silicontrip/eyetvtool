@@ -12,7 +12,7 @@
 
 + (NSArray *)getListFromType:(OSType)etvType
 {
-    NSMutableArray *list = [NSMutableArray alloc];
+    NSMutableArray *list = [NSMutableArray arrayWithCapacity:1];
     
     NSAppleEventDescriptor* eyetv =
     [NSAppleEventDescriptor descriptorWithDescriptorType:typeApplSignature bytes:"VTyE" length:4];
@@ -34,7 +34,7 @@
     
     [evt setDescriptor:[obj coerceToDescriptorType:'obj '] forKeyword:keyDirectObject];
     
-    NSLog(@"event: %@",evt);
+    // NSLog(@"event: %@",evt);
     
     AEDesc aeres;
     
@@ -51,7 +51,8 @@
     NSAppleEventDescriptor *record;
     while ((record = [recordlist descriptorAtIndex:index++]) != nil)
     {
-        NSLog(@"rec: %d",[[record descriptorForKeyword:'seld'] int32Value]);
+    //    NSLog(@"rec: %d",[[record descriptorForKeyword:'seld'] int32Value]);
+        [list addObject:[record descriptorForKeyword:'seld']];
     }
     
     

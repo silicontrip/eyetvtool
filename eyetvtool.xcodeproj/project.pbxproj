@@ -12,6 +12,7 @@
 		4DB8729116E9AADB0001FBD1 /* eyetvtool.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4DB8729016E9AADB0001FBD1 /* eyetvtool.1 */; };
 		4DB8729916E9AB1C0001FBD1 /* EyeTV.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DB8729816E9AB1C0001FBD1 /* EyeTV.m */; };
 		4DB8729B16E9F8B70001FBD1 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4DB8729A16E9F8B70001FBD1 /* ApplicationServices.framework */; };
+		4DB8729E16EA14920001FBD1 /* Arguments.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DB8729D16EA14920001FBD1 /* Arguments.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -36,6 +37,8 @@
 		4DB8729716E9AB1C0001FBD1 /* EyeTV.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EyeTV.h; sourceTree = "<group>"; };
 		4DB8729816E9AB1C0001FBD1 /* EyeTV.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EyeTV.m; sourceTree = "<group>"; };
 		4DB8729A16E9F8B70001FBD1 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = ../../../../System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<group>"; };
+		4DB8729C16EA14920001FBD1 /* Arguments.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Arguments.h; sourceTree = "<group>"; };
+		4DB8729D16EA14920001FBD1 /* Arguments.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Arguments.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -81,6 +84,8 @@
 			isa = PBXGroup;
 			children = (
 				4DB8728C16E9AADB0001FBD1 /* main.m */,
+				4DB8729C16EA14920001FBD1 /* Arguments.h */,
+				4DB8729D16EA14920001FBD1 /* Arguments.m */,
 				4DB8729716E9AB1C0001FBD1 /* EyeTV.h */,
 				4DB8729816E9AB1C0001FBD1 /* EyeTV.m */,
 				4DB8729016E9AADB0001FBD1 /* eyetvtool.1 */,
@@ -150,6 +155,7 @@
 			files = (
 				4DB8728D16E9AADB0001FBD1 /* main.m in Sources */,
 				4DB8729916E9AB1C0001FBD1 /* EyeTV.m in Sources */,
+				4DB8729E16EA14920001FBD1 /* Arguments.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
