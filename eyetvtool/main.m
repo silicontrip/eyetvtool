@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "EyeTV.h"
 
 int main(int argc, const char * argv[])
 {
@@ -14,7 +15,8 @@ int main(int argc, const char * argv[])
     @autoreleasepool {
         
         // insert code here...
-        NSLog(@"Hello, World!");
+
+        [EyeTV getListFromType:'cRec'];
         
     }
     return 0;
