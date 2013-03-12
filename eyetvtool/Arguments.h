@@ -9,10 +9,11 @@
 - (NSArray *)getArguments;
 - (NSDictionary *)getOptions;
 - (NSString *) description;
-- (NSString *) addArg:(NSString *)old:(NSString *)new:(bool *)end;
+- (NSString *) addArgOld:(NSString *)old New:(NSString *)new End:(bool *)end;
 - (BOOL)hasArgument:(NSString *)s;
 - (BOOL)containsArgument:(NSString *)s;
 - (id)optionForKey:(NSString *)s;
+- (id)optionForShortKey:(NSString *)shortKey LongKey:(NSString *)longKey;
 
 
 

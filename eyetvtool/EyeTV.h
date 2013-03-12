@@ -9,14 +9,37 @@
 #import <Foundation/Foundation.h>
 // #import <AE/AEMach.h>
 
+enum EyeTVRpts {
+    EyeTVRptsMonday = 'Mond',
+    EyeTVRptsTuesday = 'Tues',
+    EyeTVRptsWednesday = 'Wedn',
+    EyeTVRptsThursday = 'Thur',
+    EyeTVRptsFriday = 'Frid',
+    EyeTVRptsSaturday = 'Satu',
+    EyeTVRptsSunday = 'Sund',
+    EyeTVRptsNever = 'Neve',
+    EyeTVRptsNone = 'None',
+    EyeTVRptsDaily = 'Dail',
+    EyeTVRptsWeekdays = 'Week',
+    EyeTVRptsWeekends = 'Wknd'
+};
+typedef enum EyeTVRpts EyeTVRpts;
+
+
 @interface EyeTV : NSObject
 {
     NSAppleEventDescriptor *uniqueID;
-    OSType type;
-    NSAppleEventDescriptor* eyetv;
+    NSAppleEventDescriptor *type;
+    NSAppleEventDescriptor *eyetv;
 }
 
+- (NSAppleEventDescriptor *)getType;
+- (NSAppleEventDescriptor *)getApplication;
+- (NSAppleEventDescriptor *)getID;
+
+
 - (NSAppleEventDescriptor *)makeQuery:(OSType)seld;
+- (NSAppleEventDescriptor *)sendQuery:(OSType)prop;
 
 + (NSArray *)getRecordingList;
 + (NSArray *)getProgramList;
@@ -28,18 +51,48 @@
 - (id)initProgramWithID:(NSAppleEventDescriptor *)uniq;
 + (id)programWithID:(NSAppleEventDescriptor *)uniq;
 
-
 - (id)initRecordingWithID:(NSAppleEventDescriptor *)uniq;
 + (id)recordingWithID:(NSAppleEventDescriptor *)uniq;
 
 - (BOOL)matchTitle:(NSString *)match;
 - (BOOL)matchID:(NSString *)match;
 
+- (OSType)stringToRepeat:(NSString *)s;
+- (NSString *)repeatToString:(OSType)repeat;
+- (NSString *)secToString:(int)seconds;
+
 - (int)getUniqueID;
 - (NSString *)getTitle;
-- (NSDate *)getStartDate;
+- (NSDate *)getActualStart;
 - (NSDate *)getStart;
 - (int)getDuration;
+- (NSString *)getDurationAsString;
+- (int)getActualDuration;
+- (NSString *)getActualDurationAsString;
+- (NSString *)getEpisode;
+- (BOOL)isBusy;
+- (int)getChannelNumber;
+- (NSString *)getChannelName;
+- (NSAppleEventDescriptor *)getRepeats;
+- (NSString *)getRepeatsAsString;
+- (BOOL)getEnabled;
+
+- (void)setProp:(OSType)prop value:(NSAppleEventDescriptor *)val;
+- (void)setTitle:(NSString *)s;
+- (void)setDuration:(int)d;
+- (void)setChannelNumber:(int)ch;
+- (void)setStart:(NSDate *)date;
+- (void)setStartWithString:(NSString *)date;
+- (void)setRepeatsWithString:(NSString *)rpt;
+- (void)setEnableDisable:(BOOL)enable;
+- (void)setEnabled;
+- (void)setDisabled;
+
+- (void)remove;
+
+- (void)setInteraction:(OSType)i;
+- (void)setInteractionOn;
+- (void)setInteractionOff;
 
 
 

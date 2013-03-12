@@ -10,15 +10,46 @@
 
 @implementation EyeTV
 
+- (NSAppleEventDescriptor *)getType
+{
+    return self->type;
+}
+
+- (void)setType:(OSType)t
+{
+    self->type = [NSAppleEventDescriptor descriptorWithTypeCode:t];
+}
+
+- (NSAppleEventDescriptor *)getApplication
+{
+    return self->eyetv;
+}
+
+- (NSAppleEventDescriptor *)getID
+{
+    return self->uniqueID;
+}
+
+- (void)setID:(NSAppleEventDescriptor *)id
+{
+    self->uniqueID = id;
+}
+
 - (NSAppleEventDescriptor *)makeQuery:(OSType)seld
 {
 
+    /*
+    NSLog(@"seld: %d",seld);
+    NSLog(@"type: %@",[self getType]);
+    NSLog(@"ID: %@",[self getID]);
+    */
+    
     NSAppleEventDescriptor *obj = [NSAppleEventDescriptor recordDescriptor];
     NSAppleEventDescriptor *from = [NSAppleEventDescriptor recordDescriptor];
 
     [from setParamDescriptor:[NSAppleEventDescriptor descriptorWithEnumCode:'ID  '] forKeyword:'form'];
-    [from setParamDescriptor:[NSAppleEventDescriptor descriptorWithTypeCode:self->type] forKeyword:'want'];
-    [from setParamDescriptor:[NSAppleEventDescriptor descriptorWithInt32:[self->uniqueID int32Value]] forKeyword:'seld'];
+    [from setParamDescriptor:[self getType] forKeyword:'want'];
+    [from setParamDescriptor:[self getID] forKeyword:'seld'];
     [from setParamDescriptor:[NSAppleEventDescriptor nullDescriptor] forKeyword:'from'];
 
     
@@ -38,7 +69,7 @@
     
     NSAppleEventDescriptor *evt = [NSAppleEventDescriptor appleEventWithEventClass:'core'
                                                                            eventID:'getd'
-                                                                  targetDescriptor:self->eyetv
+                                                                  targetDescriptor:[self getApplication]
                                                                           returnID:kAutoGenerateReturnID
                                                                      transactionID:kAnyTransactionID];
 
@@ -53,11 +84,34 @@
 
 }
 
+- (NSDate *)getDate:(OSType)prop
+{
+    
+    NSDate *resultDate = nil;
+    CFAbsoluteTime absoluteTime;
+    LongDateTime longDateTime;
+    
+    NSAppleEventDescriptor *aeDate = [self sendQuery:prop];
+    
+    [[aeDate data] getBytes:&longDateTime length:sizeof(longDateTime)];
+    
+    OSStatus status = UCConvertLongDateTimeToCFAbsoluteTime(longDateTime, &absoluteTime);
+    
+    if (status == noErr) {
+        CFDateRef dt = CFDateCreate(NULL, absoluteTime);
+        resultDate =(NSDate *)dt;
+        
+    }
+    
+    return resultDate;
+}
 
 - (NSString *)getText:(OSType)prop
 {
     return [[self sendQuery:prop] stringValue];
 }
+
+
 
 + (id)program
 {
@@ -69,25 +123,23 @@
 {
 
     self->eyetv = [NSAppleEventDescriptor descriptorWithDescriptorType:typeApplSignature bytes:"VTyE" length:4];
-    self->type = 'cPrg';
+    [self setType:'cPrg'];
   
     NSAppleEventDescriptor *programData = [NSAppleEventDescriptor recordDescriptor];
+ // the program is enabled by default and will begin recording immediately.
     [programData setParamDescriptor:[NSAppleEventDescriptor descriptorWithBoolean:FALSE] forKeyword:'enbl'];
 
-    NSAppleEventDescriptor *new = [NSAppleEventDescriptor recordDescriptor];
-    [new setParamDescriptor:[NSAppleEventDescriptor descriptorWithTypeCode:self->type] forKeyword:'kocl'];
-    [new setParamDescriptor:programData forKeyword:'prdt'];
-
-    
     NSAppleEventDescriptor *evt = [NSAppleEventDescriptor appleEventWithEventClass:'core'
                                                                            eventID:'crel'
-                                                                  targetDescriptor:self->eyetv
+                                                                  targetDescriptor:[self getApplication]
                                                                           returnID:kAutoGenerateReturnID
                                                                      transactionID:kAnyTransactionID];
 
-    [evt setDescriptor:[new coerceToDescriptorType:'obj '] forKeyword:keyDirectObject];
+    
+    [evt setParamDescriptor:[self getType] forKeyword:'kocl'];
+    [evt setParamDescriptor:programData forKeyword:'prdt'];
 
-     NSLog(@"event: %@",evt);
+  //   NSLog(@"event: %@",evt);
 
     
     AEDesc aeres;
@@ -99,8 +151,9 @@
     
     NSAppleEventDescriptor *res =  [[NSAppleEventDescriptor alloc] initWithAEDescNoCopy:&aeres];
     
-    NSLog(@"res: %@",res);
+ //  NSLog(@"res direct object for seld: %@");
 
+  [self setID:[[res paramDescriptorForKeyword:keyDirectObject] paramDescriptorForKeyword:'seld']];
     
     // self->uniqueID = [res paramDescriptorForKeyword:keyDirectObject];
  
@@ -131,14 +184,14 @@
 - (id)initWithID:(NSAppleEventDescriptor *)uniq type:(OSType)t
 {
     self->eyetv = [NSAppleEventDescriptor descriptorWithDescriptorType:typeApplSignature bytes:"VTyE" length:4];
-    self->type = t;
+    self->type = [NSAppleEventDescriptor descriptorWithTypeCode:t];
     self->uniqueID = uniq;
     
     NSAppleEventDescriptor *get = [self makeQuery:'Unqu'];
     
     NSAppleEventDescriptor *evt = [NSAppleEventDescriptor appleEventWithEventClass:'core'
                                                                            eventID:'getd'
-                                                                  targetDescriptor:self->eyetv
+                                                                  targetDescriptor:[self getApplication]
                                                                           returnID:kAutoGenerateReturnID
                                                                      transactionID:kAnyTransactionID];
     
@@ -185,7 +238,7 @@
     if (match == nil)
         return TRUE;
     
-    int id = [self->uniqueID int32Value];
+    int id = [self getUniqueID];
     
     NSArray *matchArray = [match componentsSeparatedByString:@"-"];
     int fromID = [[matchArray objectAtIndex:0] intValue];
@@ -205,7 +258,7 @@
 
 - (int)getUniqueID
 {
-    return [self->uniqueID int32Value];
+    return [[self getID] int32Value];
 }
 
 
@@ -219,29 +272,9 @@
     return [self getText:'Pdsc'];
 }
 
-- (NSDate *)getDate:(OSType)prop
-{
-    
-    NSDate *resultDate = nil;
-    CFAbsoluteTime absoluteTime;
-    LongDateTime longDateTime;
-    
-    NSAppleEventDescriptor *aeDate = [self sendQuery:prop];
-    
-    [[aeDate data] getBytes:&longDateTime length:sizeof(longDateTime)];
-    
-    OSStatus status = UCConvertLongDateTimeToCFAbsoluteTime(longDateTime, &absoluteTime);
-    
-    if (status == noErr) {
-        CFDateRef dt = CFDateCreate(NULL, absoluteTime);
-        resultDate = (NSDate *)CFBridgingRelease(dt);
-    }
-    
-    return resultDate;
-}
 
 
-- (NSDate *)getStartDate
+- (NSDate *)getActualStart
 {
     return [self getDate:'Acst'];
 }
@@ -257,6 +290,285 @@
 }
 
 
+- (NSString *)secToString:(int)seconds
+{
+    int hour = seconds / 3600;
+	int min = (seconds % 3600) / 60;
+	int sec = seconds % 60;
+
+    return [NSString stringWithFormat:@"%d:%02d:%02d",hour,min,sec];
+    
+}
+
+- (NSString *)getDurationAsString
+{
+    return [self secToString:[self getDuration]];
+}
+
+- (int)getActualDuration
+{
+    return [[self sendQuery:'Acdu'] int32Value];
+}
+
+- (NSString *)getActualDurationAsString
+{
+    return [self secToString:[[self sendQuery:'Acdu'] int32Value]];
+}
+
+- (NSString *)getEpisode
+{
+    return [self getText:'Epis'];
+}
+
+- (BOOL)isBusy
+{
+    return [[self sendQuery:'RTsk'] booleanValue];
+}
+
+- (int)getChannelNumber
+{
+    
+    NSAppleEventDescriptor  *channel = [self sendQuery:'Chnm'];
+   // NSLog(@"channel: %@",channel);
+    
+    return [channel int32Value];
+}
+
+- (NSString *)getChannelName
+{
+    return [self getText:'Stnm'];
+}
+
+// should make this a map
+- (OSType)stringToRepeat:(NSString *)s
+{
+
+    if ([s compare:@"Daily"]==0) return EyeTVRptsDaily;
+    if ([s compare:@"Friday"]==0) return EyeTVRptsFriday;
+    if ([s compare:@"Monday"]==0) return EyeTVRptsMonday;
+    if ([s compare:@"Never"]==0) return EyeTVRptsNever;
+    if ([s compare:@"None"]==0) return EyeTVRptsNone;
+    if ([s compare:@"Saturday"]==0) return EyeTVRptsSaturday;
+    if ([s compare:@"Sunday"]==0) return EyeTVRptsSunday;
+    if ([s compare:@"Thursday"]==0) return EyeTVRptsThursday;
+    if ([s compare:@"Tuesday"]==0) return EyeTVRptsTuesday;
+    if ([s compare:@"Wednesday"]==0) return EyeTVRptsWednesday;
+    if ([s compare:@"Weekdays"]==0) return EyeTVRptsWeekdays;
+    if ([s compare:@"Weekends"]==0) return EyeTVRptsWeekends;
+
+    return EyeTVRptsNone;
+
+}
+
+- (NSString *)repeatToString:(OSType)repeat
+{
+    switch(repeat)
+    {
+        case EyeTVRptsDaily: return @"Daily"; break;
+        case EyeTVRptsFriday: return @"Friday"; break;
+        case EyeTVRptsMonday: return @"Monday"; break;
+        case EyeTVRptsNever: return @"Never"; break;
+        case EyeTVRptsNone: return @"None"; break;
+        case EyeTVRptsSaturday: return @"Saturday"; break;
+        case EyeTVRptsSunday: return @"Sunday"; break;
+        case EyeTVRptsThursday: return @"Thursday"; break;
+        case EyeTVRptsTuesday: return @"Tuesday"; break;
+        case EyeTVRptsWednesday: return @"Wednesday"; break;
+        case EyeTVRptsWeekdays: return @"Weekdays"; break;
+        case EyeTVRptsWeekends: return @"Weekends"; break;
+        default: return nil;
+    }
+}
+
+- (NSAppleEventDescriptor *)getRepeats
+{
+    return [self sendQuery:'Rpts'];
+}
+
+- (NSString *)getRepeatsAsString
+{
+  //  NSLog(@"Repeats: %@",rpt);
+    
+    NSAppleEventDescriptor *rpt = [self getRepeats];
+
+    NSMutableString *repeats = [[NSMutableString alloc] initWithCapacity:4];
+
+    int count =1;
+    NSAppleEventDescriptor *item;
+
+    while ((item = [rpt descriptorAtIndex:count++]) != nil)
+    {
+        if (count > 2)
+            [repeats appendString:@";"];
+        
+        [repeats appendString:[self repeatToString:[item enumCodeValue]]];
+    }
+    
+    
+    return repeats;
+    
+}
+
+- (BOOL)getEnabled
+{
+    return [[self sendQuery:'enbl'] booleanValue];
+}
+
+
+
+- (void)setProp:(OSType)prop value:(NSAppleEventDescriptor *)val
+
+{
+    NSAppleEventDescriptor  *from = [NSAppleEventDescriptor recordDescriptor];
+    
+    [from setParamDescriptor:[NSAppleEventDescriptor descriptorWithEnumCode:'ID  '] forKeyword:'form'];
+    [from setParamDescriptor:[self getType] forKeyword:'want'];
+    [from setParamDescriptor:[self getID] forKeyword:'seld'];
+    [from setParamDescriptor:[NSAppleEventDescriptor nullDescriptor] forKeyword:'from'];
+    
+    NSAppleEventDescriptor  *obj = [NSAppleEventDescriptor recordDescriptor];
+    
+    [obj setParamDescriptor:[NSAppleEventDescriptor descriptorWithEnumCode:'prop'] forKeyword:'form'];
+    [obj setParamDescriptor:[NSAppleEventDescriptor descriptorWithTypeCode:'prop'] forKeyword:'want'];
+    [obj setParamDescriptor:[NSAppleEventDescriptor descriptorWithTypeCode:prop] forKeyword:'seld'];
+    [obj setParamDescriptor:[from coerceToDescriptorType:'obj '] forKeyword:'from'];
+    
+    NSAppleEventDescriptor *evt = [NSAppleEventDescriptor appleEventWithEventClass:'core'
+                                                                           eventID:'setd'
+                                                                  targetDescriptor:[self getApplication]
+                                                                          returnID:kAutoGenerateReturnID
+                                                                     transactionID:kAnyTransactionID];
+    [evt setParamDescriptor:val forKeyword:'data'];
+    [evt setDescriptor:[obj coerceToDescriptorType:'obj '] forKeyword:keyDirectObject];
+    
+//   NSLog(@"event: %@",evt);
+    
+    
+    AEDesc aeres;
+    AESendMessage([evt aeDesc], &aeres,  kAEWaitReply | kAENeverInteract, kAEDefaultTimeout);
+    
+    // there shouldn't be a response
+   // NSAppleEventDescriptor *res =
+    [[NSAppleEventDescriptor alloc] initWithAEDescNoCopy:&aeres];
+    
+ //  NSLog(@"res: %@",res);
+}
+    
+- (void)setTitle:(NSString *)s
+{
+    [self setProp:'Titl' value:[NSAppleEventDescriptor descriptorWithString:s]];
+}
+
+-(void)setDuration:(int)d
+{
+    
+    [self setProp:'Dura' value:[NSAppleEventDescriptor descriptorWithInt32:d]];
+}
+
+
+- (void)setChannelNumber:(int)ch
+{
+    [self setProp:'Chnm' value:[NSAppleEventDescriptor descriptorWithInt32:ch]];
+
+}
+
+- (void)setStart:(NSDate *)date
+{
+ 
+    
+  //  NSLog(@"Date: %@",date);
+    
+	// Get the time interval since 1st Jan 2001 of the date
+	CFAbsoluteTime timeInterval = CFDateGetAbsoluteTime((CFDateRef)date);
+    
+	// Convert the time interval to a long date
+	LongDateTime longDate;
+	UCConvertCFAbsoluteTimeToLongDateTime(timeInterval, &longDate);
+    
+	// Build the descriptor
+    [self setProp:'Stim' value:[NSAppleEventDescriptor descriptorWithDescriptorType:'ldt ' bytes:&longDate length:sizeof(longDate)]];
+                                                                                                   
+}
+
+- (void)setStartWithString:(NSString *)date
+{
+    NSDateFormatter *df = [[NSDateFormatter alloc] init];
+    [df setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+    
+  //  NSLog(@"String Date: %@",date);
+    
+    NSDate *myDate = [df dateFromString:date];
+
+    [self setStart:myDate];
+}
+
+-(void)setRepeatsWithString:(NSString *)rpt
+{
+    
+    
+    NSEnumerator *e = [[rpt componentsSeparatedByString:@","] objectEnumerator];
+    
+    NSAppleEventDescriptor *repeats = [NSAppleEventDescriptor listDescriptor];
+    
+    id object;
+    while (object = [e nextObject]) {
+        [repeats insertDescriptor:[NSAppleEventDescriptor descriptorWithTypeCode:[self stringToRepeat:object]] atIndex:0];
+    }
+    
+    [self setProp:'Rpts' value:repeats];
+
+}
+
+- (void)setEnableDisable:(BOOL)enable
+{
+    [self setProp:'enbl' value:[NSAppleEventDescriptor descriptorWithBoolean:enable]];
+}
+
+- (void)setEnabled
+{
+    [self setEnableDisable:TRUE];
+}
+
+- (void)setDisabled
+{
+    [self setEnableDisable:FALSE];
+}
+
+
+-(void)remove
+{
+    
+    NSAppleEventDescriptor  *from = [NSAppleEventDescriptor recordDescriptor];
+    
+    [from setParamDescriptor:[NSAppleEventDescriptor descriptorWithEnumCode:'ID  '] forKeyword:'form'];
+    [from setParamDescriptor:[self getType] forKeyword:'want'];
+    [from setParamDescriptor:[self getID] forKeyword:'seld'];
+    [from setParamDescriptor:[NSAppleEventDescriptor nullDescriptor] forKeyword:'from'];
+
+    NSAppleEventDescriptor *evt = [NSAppleEventDescriptor appleEventWithEventClass:'core'
+                                                                           eventID:'delo'
+                                                                  targetDescriptor:[self getApplication]
+                                                                          returnID:kAutoGenerateReturnID
+                                                                     transactionID:kAnyTransactionID];
+    
+    [evt setDescriptor:[from coerceToDescriptorType:'obj '] forKeyword:keyDirectObject];
+    
+   // NSLog(@"event: %@",evt);
+    
+    
+    AEDesc aeres;
+    
+    // ARE YOU SURE ?
+  AESendMessage([evt aeDesc], &aeres,  kAEWaitReply | kAENeverInteract, kAEDefaultTimeout);
+    
+    // there shouldn't be a response
+    //NSAppleEventDescriptor *res =
+    [[NSAppleEventDescriptor alloc] initWithAEDescNoCopy:&aeres];
+    
+    //NSLog(@"res: %@",res);
+
+    
+}
 
 + (NSArray *)getRecordingList
 {
@@ -310,6 +622,8 @@
         [list addObject:[record descriptorForKeyword:'seld']];
     }
     
+   // [list sortUsingSelector:@selector(compare:)];
+    /*
      [list sortUsingComparator: ^(id obj1, id obj2) {
         
         if ([obj1 int32Value] > [obj2 int32Value]) {
@@ -321,10 +635,51 @@
         }
         return (NSComparisonResult)NSOrderedSame;
     }];
-
+*/
     return list;
+     
 }
 
+- (void)setInteraction:(OSType)i
+{
+    
+    NSAppleEventDescriptor *evt = [NSAppleEventDescriptor appleEventWithEventClass:'core'
+                                                                           eventID:'setd'
+                                                                  targetDescriptor:eyetv
+                                                                          returnID:kAutoGenerateReturnID
+                                                                     transactionID:kAnyTransactionID];
+    
+    NSAppleEventDescriptor *obj = [NSAppleEventDescriptor recordDescriptor];
+    
+    [obj setParamDescriptor:[NSAppleEventDescriptor descriptorWithEnumCode:'prop'] forKeyword:'form'];
+    [obj setParamDescriptor:[NSAppleEventDescriptor descriptorWithTypeCode:'prop'] forKeyword:'want'];
+    [obj setParamDescriptor:[NSAppleEventDescriptor descriptorWithTypeCode:'eInl'] forKeyword:'seld'];
+    
+    [obj setParamDescriptor:[NSAppleEventDescriptor nullDescriptor] forKeyword:'from'];
+    [obj setParamDescriptor:[NSAppleEventDescriptor descriptorWithTypeCode:i] forKeyword:'data'];
+
+    
+    [evt setDescriptor:[obj coerceToDescriptorType:'obj '] forKeyword:keyDirectObject];
+
+    AEDesc aeres;
+    AESendMessage([evt aeDesc], &aeres,  kAEWaitReply | kAENeverInteract, kAEDefaultTimeout);
+    
+    NSAppleEventDescriptor *res =  [[NSAppleEventDescriptor alloc] initWithAEDescNoCopy:&aeres];
+    
+    NSLog(@"res: %@",res);
+
+    
+}
+
+- (void) setInteractionOn
+{
+    [self setInteraction:'eInA'];
+}
+
+- (void) setInteractionOff
+{
+    [self setInteraction:'eNvr'];
+}
 
 
 @end

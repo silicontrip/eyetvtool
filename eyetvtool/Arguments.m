@@ -12,7 +12,7 @@
 	return self;
 }
 
-- (NSString *) addArg:(NSString *)old:(NSString *)new:(bool *)end 
+- (NSString *) addArgOld:(NSString *)old New:(NSString *)new End:(bool *)end
 {
 
 	if (old) {
@@ -89,11 +89,11 @@
 	{
 
 //		NSLog(@"old: %@ current: %@",oldArg,argument);
-		oldArg = [self addArg:oldArg:argument:&endOfArguments];
+		oldArg = [self addArgOld:oldArg New:argument End:&endOfArguments];
 	}
 
 
-	[self addArg:oldArg:@"--":&endOfArguments];
+	[self addArgOld:oldArg New:@"--" End:&endOfArguments];
 
 	return self;
 
@@ -110,6 +110,18 @@
 - (id)optionForKey:(NSString *)s 
 {
 	return [opt objectForKey:s];
+}
+
+- (id)optionForShortKey:(NSString *)shortKey LongKey:(NSString *)longKey
+{
+    
+    // not sure if I should check to see if both long key and short key are set
+    
+    if ([self optionForKey:shortKey] != nil)
+        return [self optionForKey:shortKey];
+    
+    return [self optionForKey:longKey];
+
 }
 
 - (NSArray *)getArguments { return arg; }
