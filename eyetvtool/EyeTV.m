@@ -78,7 +78,7 @@
     AEDesc aeres;
     AESendMessage([evt aeDesc], &aeres,  kAEWaitReply | kAENeverInteract, kAEDefaultTimeout);
     
-    NSAppleEventDescriptor *res =  [[NSAppleEventDescriptor alloc] initWithAEDescNoCopy:&aeres];
+    NSAppleEventDescriptor *res =  [[[NSAppleEventDescriptor alloc] initWithAEDescNoCopy:&aeres] autorelease];
     
     return [res paramDescriptorForKeyword:keyDirectObject];
 
@@ -100,7 +100,8 @@
     if (status == noErr) {
         CFDateRef dt = CFDateCreate(NULL, absoluteTime);
         resultDate =(NSDate *)dt;
-        
+        CFRelease(dt);
+
     }
     
     return resultDate;
@@ -115,13 +116,14 @@
 
 + (id)program
 {
-    return [[self alloc] initProgram];
+    return [[[self alloc] initProgram] autorelease];
 }
 
 
 - (id)initProgram
 {
 
+    self = [self init];
     self->eyetv = [NSAppleEventDescriptor descriptorWithDescriptorType:typeApplSignature bytes:"VTyE" length:4];
     [self setType:'cPrg'];
   
@@ -146,6 +148,7 @@
     OSErr err=  AESendMessage([evt aeDesc], &aeres,  kAEWaitReply | kAENeverInteract, kAEDefaultTimeout);
     
     if (err != noErr) {
+        [self release];
 		return nil;
 	}
     
@@ -156,13 +159,13 @@
   [self setID:[[res paramDescriptorForKeyword:keyDirectObject] paramDescriptorForKeyword:'seld']];
     
     // self->uniqueID = [res paramDescriptorForKeyword:keyDirectObject];
- 
+    [res release];
     return self;
 }
 
 + (id)programWithID:(NSAppleEventDescriptor *)uniq
 {
-    return [[self alloc] initProgramWithID:uniq];
+    return [[[self alloc] initProgramWithID:uniq] autorelease];
 }
 
 - (id)initProgramWithID:(NSAppleEventDescriptor *)uniq
@@ -173,7 +176,7 @@
 
 + (id)recordingWithID:(NSAppleEventDescriptor *)uniq
 {
-    return [[self alloc] initRecordingWithID:uniq];
+    return [[[self alloc] initRecordingWithID:uniq] autorelease];
 }
 
 - (id)initRecordingWithID:(NSAppleEventDescriptor *)uniq
@@ -183,6 +186,9 @@
 
 - (id)initWithID:(NSAppleEventDescriptor *)uniq type:(OSType)t
 {
+    
+    self = [self init];
+    
     self->eyetv = [NSAppleEventDescriptor descriptorWithDescriptorType:typeApplSignature bytes:"VTyE" length:4];
     self->type = [NSAppleEventDescriptor descriptorWithTypeCode:t];
     self->uniqueID = uniq;
@@ -203,6 +209,7 @@
     OSErr err=  AESendMessage([evt aeDesc], &aeres,  kAEWaitReply | kAENeverInteract, kAEDefaultTimeout);
     
     if (err != noErr) {
+        [self release];
 		return nil;
 	}
 
@@ -210,6 +217,8 @@
     
     self->uniqueID = [res paramDescriptorForKeyword:keyDirectObject];
 
+    [res release];
+    
     //   NSLog(@"res: %@",res);
     
     return self;
@@ -391,7 +400,7 @@
     
     NSAppleEventDescriptor *rpt = [self getRepeats];
 
-    NSMutableString *repeats = [[NSMutableString alloc] initWithCapacity:4];
+    NSMutableString *repeats = [[[NSMutableString alloc] initWithCapacity:4] autorelease];
 
     int count =1;
     NSAppleEventDescriptor *item;
@@ -448,8 +457,7 @@
     AESendMessage([evt aeDesc], &aeres,  kAEWaitReply | kAENeverInteract, kAEDefaultTimeout);
     
     // there shouldn't be a response
-   // NSAppleEventDescriptor *res =
-    [[NSAppleEventDescriptor alloc] initWithAEDescNoCopy:&aeres];
+   // NSAppleEventDescriptor *res = [[NSAppleEventDescriptor alloc] initWithAEDescNoCopy:&aeres];
     
  //  NSLog(@"res: %@",res);
 }
@@ -500,6 +508,8 @@
     NSDate *myDate = [df dateFromString:date];
 
     [self setStart:myDate];
+    
+    [df release];
 }
 
 -(void)setRepeatsWithString:(NSString *)rpt
@@ -562,8 +572,7 @@
   AESendMessage([evt aeDesc], &aeres,  kAEWaitReply | kAENeverInteract, kAEDefaultTimeout);
     
     // there shouldn't be a response
-    //NSAppleEventDescriptor *res =
-    [[NSAppleEventDescriptor alloc] initWithAEDescNoCopy:&aeres];
+    //NSAppleEventDescriptor *res = [[NSAppleEventDescriptor alloc] initWithAEDescNoCopy:&aeres];
     
     //NSLog(@"res: %@",res);
 
@@ -622,6 +631,10 @@
         [list addObject:[record descriptorForKeyword:'seld']];
     }
     
+    // TODO: sort list. sortUsingComparator is a newly added method.
+    
+    [res release];
+    
    // [list sortUsingSelector:@selector(compare:)];
     /*
      [list sortUsingComparator: ^(id obj1, id obj2) {
@@ -668,6 +681,7 @@
     
     NSLog(@"res: %@",res);
 
+    [res release];
     
 }
 

@@ -215,6 +215,7 @@ int main(int argc, const char * argv[])
                 
             }
         }
+        [newargs release];
     }
     return 0;
 }
