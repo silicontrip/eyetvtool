@@ -443,12 +443,15 @@
     
     
     AEDesc aeres;
-    AESendMessage([evt aeDesc], &aeres,  kAEWaitReply | kAENeverInteract, kAEDefaultTimeout);
+  OSErr err =   AESendMessage([evt aeDesc], &aeres,  kAEWaitReply | kAENeverInteract, kAEDefaultTimeout);
+    
+    if (err != noErr)
+    {
+        NSAppleEventDescriptor *res = [[NSAppleEventDescriptor alloc] initWithAEDescNoCopy:&aeres];
+        NSLog(@"Error Setting Property: %@",res);
+    }
     
     // there shouldn't be a response
-   // NSAppleEventDescriptor *res = [[NSAppleEventDescriptor alloc] initWithAEDescNoCopy:&aeres];
-    
- //  NSLog(@"res: %@",res);
 }
     
 - (void)setTitle:(NSString *)s
@@ -550,38 +553,52 @@
 -(void)exportToPath:(NSString *)path withFormat:(OSType)format
 {
 
-    // TODO: 
-    NSAppleEventDescriptor *query = [NSAppleEventDescriptor recordDescriptor];
-    
-    [query setParamDescriptor:[[self currentObject] coerceToDescriptorType:'obj '] forKeyword:'Esrc' ];
-    [query setParamDescriptor:[NSAppleEventDescriptor descriptorWithString:path] forKeyword:'Etgt'];
-    [query setParamDescriptor:[NSAppleEventDescriptor descriptorWithEnumCode:format] forKeyword:'Etyp'];
-    [query setParamDescriptor:[NSAppleEventDescriptor descriptorWithBoolean:TRUE] forKeyword:'Repl'];
-    [query setParamDescriptor:[NSAppleEventDescriptor descriptorWithBoolean:FALSE] forKeyword:'Opng'];
-    
-    
+
     
     NSAppleEventDescriptor *evt = [NSAppleEventDescriptor appleEventWithEventClass:'EyTV'
                                                                            eventID:'Expo'
                                                                   targetDescriptor:[self getApplication]
                                                                           returnID:kAutoGenerateReturnID
                                                                      transactionID:kAnyTransactionID];
+
     
-    [evt setDescriptor:[query coerceToDescriptorType:'obj '] forKeyword:keyDirectObject];
+    [evt setParamDescriptor:[[self currentObject] coerceToDescriptorType:'obj '] forKeyword:'Esrc' ];
+    [evt setParamDescriptor:[NSAppleEventDescriptor descriptorWithString:path] forKeyword:'Etgt'];
+    [evt setParamDescriptor:[NSAppleEventDescriptor descriptorWithEnumCode:format] forKeyword:'Etyp'];
+    [evt setParamDescriptor:[NSAppleEventDescriptor descriptorWithBoolean:TRUE] forKeyword:'Repl'];
+    [evt setParamDescriptor:[NSAppleEventDescriptor descriptorWithBoolean:FALSE] forKeyword:'Opng'];
     
-    NSLog(@"event: %@",evt);
     
+   // [evt setDescriptor:[query coerceToDescriptorType:'obj '] forKeyword:keyDirectObject];
+    
+    [self setInteractionOff];
+        
     
     AEDesc aeres;
     
-    // AESendMessage([evt aeDesc], &aeres,  kAEWaitReply | kAENeverInteract, kAEDefaultTimeout);
+    OSErr err =   AESendMessage([evt aeDesc], &aeres,  kAEWaitReply | kAENeverInteract, kAEDefaultTimeout);
     
+    NSAppleEventDescriptor *res = [[NSAppleEventDescriptor alloc] initWithAEDescNoCopy:&aeres];
+
+    if (err != noErr)
+    {
+        NSLog(@"Error Exporting: %@",res);
+    }
+
+    while ([self isBusy])
+    {
+        printf("."); fflush(stdout);
+        sleep(1);
+    }
+    printf("\n");
+
+    [self setInteractionOn];
+
     // should check for errors.
 }
 
 -(void)remove
 {
-    
 
     NSAppleEventDescriptor *evt = [NSAppleEventDescriptor appleEventWithEventClass:'core'
                                                                            eventID:'delo'
@@ -597,13 +614,13 @@
     AEDesc aeres;
     
     // ARE YOU SURE ?
-  AESendMessage([evt aeDesc], &aeres,  kAEWaitReply | kAENeverInteract, kAEDefaultTimeout);
+    OSErr err =   AESendMessage([evt aeDesc], &aeres,  kAEWaitReply | kAENeverInteract, kAEDefaultTimeout);
     
-    // there shouldn't be a response
-    //NSAppleEventDescriptor *res = [[NSAppleEventDescriptor alloc] initWithAEDescNoCopy:&aeres];
-    
-    //NSLog(@"res: %@",res);
-
+    if (err != noErr)
+    {
+        NSAppleEventDescriptor *res = [[NSAppleEventDescriptor alloc] initWithAEDescNoCopy:&aeres];
+        NSLog(@"Error Deleting: %@",res);
+    }
     
 }
 
@@ -642,9 +659,17 @@
     // NSLog(@"event: %@",evt);
     
     AEDesc aeres;
-    AESendMessage([evt aeDesc], &aeres,  kAEWaitReply | kAENeverInteract, kAEDefaultTimeout);
+    OSErr err = AESendMessage([evt aeDesc], &aeres,  kAEWaitReply | kAENeverInteract, kAEDefaultTimeout);
 
+    
     NSAppleEventDescriptor *res =  [[NSAppleEventDescriptor alloc] initWithAEDescNoCopy:&aeres];
+
+    if (err != noErr)
+    {
+        NSLog(@"Error getting List: %@",res);
+        return nil;
+    }
+    
 
    // NSLog(@"res: %@",res);
 
@@ -695,19 +720,23 @@
     [obj setParamDescriptor:[NSAppleEventDescriptor descriptorWithEnumCode:'prop'] forKeyword:'form'];
     [obj setParamDescriptor:[NSAppleEventDescriptor descriptorWithTypeCode:'prop'] forKeyword:'want'];
     [obj setParamDescriptor:[NSAppleEventDescriptor descriptorWithTypeCode:'eInl'] forKeyword:'seld'];
-    
     [obj setParamDescriptor:[NSAppleEventDescriptor nullDescriptor] forKeyword:'from'];
-    [obj setParamDescriptor:[NSAppleEventDescriptor descriptorWithTypeCode:i] forKeyword:'data'];
+    
+    [evt setParamDescriptor:[NSAppleEventDescriptor descriptorWithEnumCode:i] forKeyword:'data'];
 
     
     [evt setDescriptor:[obj coerceToDescriptorType:'obj '] forKeyword:keyDirectObject];
 
     AEDesc aeres;
-    AESendMessage([evt aeDesc], &aeres,  kAEWaitReply | kAENeverInteract, kAEDefaultTimeout);
+    OSErr err = AESendMessage([evt aeDesc], &aeres,  kAEWaitReply | kAENeverInteract, kAEDefaultTimeout);
+    
     
     NSAppleEventDescriptor *res =  [[NSAppleEventDescriptor alloc] initWithAEDescNoCopy:&aeres];
     
-    NSLog(@"res: %@",res);
+    if (err != noErr)
+    {
+        NSLog(@"Error setting interactivity: %@",res);
+    }
 
     [res release];
     

@@ -163,6 +163,8 @@ int main(int argc, const char * argv[])
                                              [format stringFromDate:[rec getActualStart]],
                                              [rec getUniqueID]];
                             
+                          //  path=@"test.mpg";
+                            
                             [format release];
                             
                           [rec exportToPath:path withFormat:'MPEG'];
