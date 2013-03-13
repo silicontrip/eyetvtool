@@ -78,6 +78,8 @@ typedef enum EyeTVRpts EyeTVRpts;
 - (NSAppleEventDescriptor *)getRepeats;
 - (NSString *)getRepeatsAsString;
 - (BOOL)getEnabled;
+- (NSString *)getEnabledAsString;
+
 
 - (void)setProp:(OSType)prop value:(NSAppleEventDescriptor *)val;
 - (void)setTitle:(NSString *)s;
@@ -97,6 +99,7 @@ typedef enum EyeTVRpts EyeTVRpts;
 - (void)setInteractionOn;
 - (void)setInteractionOff;
 
+- (NSString *)description;
 
 
 @end

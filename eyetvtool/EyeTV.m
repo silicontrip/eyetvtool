@@ -224,7 +224,6 @@
     
 }
 
-// TODO: make this an instance variable.
 - (NSAppleEventDescriptor *)buildObject
 {
     NSAppleEventDescriptor  *from = [NSAppleEventDescriptor recordDescriptor];
@@ -439,7 +438,15 @@
     return [[self sendQuery:'enbl'] booleanValue];
 }
 
+- (NSString *)getEnabledAsString
+{
+    if ([self getEnabled])
+        return @"ENABLED";
+    else
+        return @"DISABLED";
+}
 
+// pragma: mark
 
 - (void)setProp:(OSType)prop value:(NSAppleEventDescriptor *)val
 
@@ -470,6 +477,7 @@
     {
         NSAppleEventDescriptor *res = [[NSAppleEventDescriptor alloc] initWithAEDescNoCopy:&aeres];
         NSLog(@"Error Setting Property: %@",res);
+        [res release];
     }
     
     // there shouldn't be a response
@@ -596,6 +604,8 @@
         NSLog(@"Error Exporting: %@",res);
     }
 
+    [res release];
+    
     while ([self isBusy])
     {
         printf("."); fflush(stdout);
@@ -631,6 +641,7 @@
     {
         NSAppleEventDescriptor *res = [[NSAppleEventDescriptor alloc] initWithAEDescNoCopy:&aeres];
         NSLog(@"Error Deleting: %@",res);
+        [res release];
     }
     
 }
@@ -678,6 +689,7 @@
     if (err != noErr)
     {
         NSLog(@"Error getting List: %@",res);
+        [res release];
         return nil;
     }
     
@@ -752,5 +764,28 @@
     [self setInteraction:'eNvr'];
 }
 
+- (NSString *)description
+{
+    if ([[self getType] typeCodeValue] == 'cPrg')
+    {
+            return [NSString stringWithFormat:@"%d: %@, %@, %@, %d, %@, %@, %@",
+                    [self getUniqueID],
+               [self getTitle],
+               [[self getStart] description],
+               [self getDurationAsString],
+               [self getChannelNumber],
+               [self getChannelName],
+               [self getRepeatsAsString],
+               [self getEnabledAsString]];
+
+    } else {
+        return [NSString stringWithFormat:@"%d: %@, %@, %@",
+                [self getUniqueID],
+                [self getTitle],
+                [[self getActualStart] description],
+                [self getActualDurationAsString] ];
+    }
+    
+}
 
 @end
