@@ -44,7 +44,7 @@ int main(int argc, const char * argv[])
     
     @autoreleasepool {
         
-        Arguments *newargs = [[Arguments alloc]  initWithNSProcessInfoArguments:[[NSProcessInfo processInfo] arguments]];
+        Arguments *newargs = [Arguments argumentsWithNSProcessInfoArguments:[[NSProcessInfo processInfo] arguments]];
         
         if([newargs hasArgument:@"help"] || [newargs hasArgument:@"h"])
         {
@@ -79,7 +79,7 @@ int main(int argc, const char * argv[])
             
             if (set_title != nil)
                 [rec setTitle:set_title];
-
+            
             if (set_duration != nil)
                 [rec setDuration:[set_duration integerValue]];
             
@@ -96,18 +96,8 @@ int main(int argc, const char * argv[])
             
             if (set_channel!=nil)
                 [rec setChannelNumber:[set_channel integerValue]];
-
-            printf("%d: %s, %s, %s, %d, %s, %s, %d\n",[rec getUniqueID],
-                   [[rec getTitle] UTF8String],
-                   [[[rec getStart] description] UTF8String],
-                   [[rec getDurationAsString] UTF8String],
-                   [rec getChannelNumber],
-                   [[rec getChannelName] UTF8String],
-                   [[rec getRepeatsAsString] UTF8String],
-                   [rec getEnabled]);
-
             
-            //WithTitle:set_title channel:set_channel startsAt:set_start duration:set_duration];
+            printf("%s\n",[[rec description]UTF8String]);
             
         } else {
             
@@ -118,13 +108,13 @@ int main(int argc, const char * argv[])
                 exit(0);
                 
             }
-
+            
             
             if (![newargs hasArgument:@"P"] && ![newargs hasArgument:@"programs"]) {
                 
                 NSLog(@"RECORDINGS");
                 printf("\n");
-
+                
                 NSEnumerator *e = [[EyeTV getRecordingList] objectEnumerator];
                 id object;
                 while (object = [e nextObject]) {
@@ -138,37 +128,27 @@ int main(int argc, const char * argv[])
                         if (set_title != nil)
                             [rec setTitle:set_title];
                         
-                        printf("%d: %s, %s, %s\n",[rec getUniqueID],
-                               [[rec getTitle] UTF8String],
-                               [[[rec getActualStart] description] UTF8String],
-                               [[rec getActualDurationAsString] UTF8String]);
+                        printf("%s\n",[[rec description]UTF8String]);
                         
                         if (action_export)
                         {
-                            // export me baby
-                            
-                            
-                            // format date
-                            
                             NSDateFormatter *format = [[NSDateFormatter alloc] init];
                             [format setDateFormat:@"yyyy-MM-dd"];
                             
-                            char buf[1024];
+                            // TODO: find a better way (NSFoundation way) to get current directory
+                            char buf[1024]; getcwd(buf, 1024);
                             
-                            getcwd(buf, 1024);
-                            
+                            // TODO:  make output directory option
                             NSString *path = [NSString stringWithFormat:@"%@/%@_%@_%d.mpg",
-                                             [NSString stringWithUTF8String:buf],
-                                             [[rec getTitle] stringByReplacingOccurrencesOfString:@" " withString:@"_"],
-                                             [format stringFromDate:[rec getActualStart]],
-                                             [rec getUniqueID]];
-                            
-                          //  path=@"test.mpg";
+                                              [NSString stringWithUTF8String:buf],
+                                              [[rec getTitle] stringByReplacingOccurrencesOfString:@" " withString:@"_"],
+                                              [format stringFromDate:[rec getActualStart]],
+                                              [rec getUniqueID]];
                             
                             [format release];
                             
-                          [rec exportToPath:path withFormat:'MPEG'];
-                          //  NSLog(@"exportToPath:%@ ",path);
+                            [rec exportToPath:path withFormat:'MPEG'];
+                            //  NSLog(@"exportToPath:%@ ",path);
                             
                         }
                         if (action_remove)
@@ -184,7 +164,7 @@ int main(int argc, const char * argv[])
                 printf("\n");
                 NSLog(@"PROGRAMS");
                 printf("\n");
-
+                
                 NSEnumerator *e = [[EyeTV getProgramList] objectEnumerator];
                 id object;
                 while (object = [e nextObject]) {
@@ -221,19 +201,11 @@ int main(int argc, const char * argv[])
                                 [rec setChannelNumber:[set_channel integerValue]];
                             
                             
-                            printf("%d: %s, %s, %s, %d, %s, %s, %d\n",[rec getUniqueID],
-                                   [[rec getTitle] UTF8String],
-                                   [[[rec getStart] description] UTF8String],
-                                   [[rec getDurationAsString] UTF8String],
-                                   [rec getChannelNumber],
-                                   [[rec getChannelName] UTF8String],
-                                   [[rec getRepeatsAsString] UTF8String],
-                                   [rec getEnabled]
-                                );
-                                                        
+                            printf("%s\n",[[rec description]UTF8String]);
+                            
                             if (action_remove)
                                 [rec remove];
-
+                            
                         }
                     }
                 }
@@ -241,7 +213,6 @@ int main(int argc, const char * argv[])
                 
             }
         }
-        [newargs release];
     }
     return 0;
 }
