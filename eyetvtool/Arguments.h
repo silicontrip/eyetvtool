@@ -5,6 +5,7 @@
 	NSMutableArray *arg;
 }
 
++ (id)argumentsWithNSProcessInfoArguments:(NSArray *)a;
 - (id)initWithNSProcessInfoArguments:(NSArray *)a;
 - (NSArray *)getArguments;
 - (NSDictionary *)getOptions;

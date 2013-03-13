@@ -78,6 +78,11 @@
 ** or they must be seperated by a -- (--long -- arg1 arg2 arg3)
 */
 
++ (id)argumentsWithNSProcessInfoArguments:(NSArray *)a
+{
+    return [[[self alloc] initWithNSProcessInfoArguments:a] autorelease];
+}
+
 - (id)initWithNSProcessInfoArguments:(NSArray *)a
 {
 	self = [self init];
