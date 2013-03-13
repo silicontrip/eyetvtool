@@ -38,7 +38,7 @@ typedef enum EyeTVRpts EyeTVRpts;
 - (NSAppleEventDescriptor *)getApplication;
 - (NSAppleEventDescriptor *)getID;
 - (NSAppleEventDescriptor *)currentObject;
-
+- (NSAppleEventDescriptor *)buildObject;
 
 - (NSAppleEventDescriptor *)makeQuery:(OSType)seld;
 - (NSAppleEventDescriptor *)sendQuery:(OSType)prop;

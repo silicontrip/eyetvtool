@@ -14,7 +14,7 @@ void usage()
 {
     
     printf ("Eye TV Tool.  A command line interface for controlling the Eye TV PVR software.\n");
-    printf ("Usage etvtool.pl [OPTION]\n\n");
+    printf ("Usage eyetvtool [OPTION]\n\n");
     printf ("Actions:\n");
     printf ("--export     Export selected recordings\n");
     printf ("--delete     Delete selected recordings or programs\n");
@@ -230,10 +230,7 @@ int main(int argc, const char * argv[])
                                    [[rec getRepeatsAsString] UTF8String],
                                    [rec getEnabled]
                                 );
-                            
-                            if (action_export)
-                                [rec export];
-                            
+                                                        
                             if (action_remove)
                                 [rec remove];
 

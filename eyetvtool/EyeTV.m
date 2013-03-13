@@ -188,6 +188,9 @@
     self->type = [NSAppleEventDescriptor descriptorWithTypeCode:t];
     self->uniqueID = uniq;
     
+    self->eyetvObject = [self buildObject];
+
+    
     NSAppleEventDescriptor *get = [self makeQuery:'Unqu'];
     
     NSAppleEventDescriptor *evt = [NSAppleEventDescriptor appleEventWithEventClass:'core'
@@ -212,6 +215,7 @@
     
     self->uniqueID = [res paramDescriptorForKeyword:keyDirectObject];
 
+    
     [res release];
     
     //   NSLog(@"res: %@",res);
@@ -220,7 +224,24 @@
     
 }
 
+// TODO: make this an instance variable.
+- (NSAppleEventDescriptor *)buildObject
+{
+    NSAppleEventDescriptor  *from = [NSAppleEventDescriptor recordDescriptor];
+    
+    [from setParamDescriptor:[NSAppleEventDescriptor descriptorWithEnumCode:'ID  '] forKeyword:'form'];
+    [from setParamDescriptor:[self getType] forKeyword:'want'];
+    [from setParamDescriptor:[self getID] forKeyword:'seld'];
+    [from setParamDescriptor:[NSAppleEventDescriptor nullDescriptor] forKeyword:'from'];
+    
+    return from;
+}
 
+
+- (NSAppleEventDescriptor *)currentObject
+{
+    return eyetvObject;
+}
 
 - (BOOL)matchTitle:(NSString *)match
 {
@@ -504,6 +525,7 @@
     [df release];
 }
 
+// TODO: DEBUG why this does not work.
 -(void)setRepeatsWithString:(NSString *)rpt
 {
     
@@ -538,17 +560,6 @@
     [self setEnableDisable:FALSE];
 }
 
-- (NSAppleEventDescriptor *)currentObject
-{
-    NSAppleEventDescriptor  *from = [NSAppleEventDescriptor recordDescriptor];
-    
-    [from setParamDescriptor:[NSAppleEventDescriptor descriptorWithEnumCode:'ID  '] forKeyword:'form'];
-    [from setParamDescriptor:[self getType] forKeyword:'want'];
-    [from setParamDescriptor:[self getID] forKeyword:'seld'];
-    [from setParamDescriptor:[NSAppleEventDescriptor nullDescriptor] forKeyword:'from'];
-
-    return from;
-}
 
 -(void)exportToPath:(NSString *)path withFormat:(OSType)format
 {
@@ -686,10 +697,8 @@
     
     [res release];
     
-    NSSortDescriptor *recordDescriptor =
-    [[[NSSortDescriptor alloc]
-      initWithKey:@"int32Value"
-      ascending:YES] autorelease];
+    NSSortDescriptor *recordDescriptor = [[[NSSortDescriptor alloc] initWithKey:@"int32Value"
+                                                                      ascending:YES] autorelease];
 
     NSArray * descriptors = [NSArray arrayWithObjects:recordDescriptor, nil];
 
