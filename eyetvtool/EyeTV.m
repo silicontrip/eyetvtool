@@ -678,32 +678,23 @@
     int index = 1;
     
     NSAppleEventDescriptor *record;
-    while ((record = [recordlist descriptorAtIndex:index++]) != nil)
+    while ((record = [recordlist descriptorAtIndex:index++]))
     {
     //    NSLog(@"rec: %d",[[record descriptorForKeyword:'seld'] int32Value]);
         [list addObject:[record descriptorForKeyword:'seld']];
     }
     
-    // TODO: sort list. sortUsingComparator is a newly added method.
-    
     [res release];
     
-   // [list sortUsingSelector:@selector(compare:)];
-    /*
-     [list sortUsingComparator: ^(id obj1, id obj2) {
-        
-        if ([obj1 int32Value] > [obj2 int32Value]) {
-            return (NSComparisonResult)NSOrderedDescending;
-        }
-        
-        if ([obj1 int32Value] < [obj2 int32Value]) {
-            return (NSComparisonResult)NSOrderedAscending;
-        }
-        return (NSComparisonResult)NSOrderedSame;
-    }];
-*/
-    return list;
-     
+    NSSortDescriptor *recordDescriptor =
+    [[[NSSortDescriptor alloc]
+      initWithKey:@"int32Value"
+      ascending:YES] autorelease];
+
+    NSArray * descriptors = [NSArray arrayWithObjects:recordDescriptor, nil];
+
+    return [list sortedArrayUsingDescriptors:descriptors];
+
 }
 
 - (void)setInteraction:(OSType)i
