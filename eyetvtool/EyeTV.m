@@ -544,7 +544,7 @@
     
     id object;
     while (object = [e nextObject]) {
-        [repeats insertDescriptor:[NSAppleEventDescriptor descriptorWithTypeCode:[self stringToRepeat:object]] atIndex:0];
+        [repeats insertDescriptor:[NSAppleEventDescriptor descriptorWithEnumCode:[self stringToRepeat:object]] atIndex:0];
     }
     
     NSLog(@"repeats %@",repeats);
@@ -769,7 +769,7 @@
     if ([[self getType] typeCodeValue] == 'cPrg')
     {
             return [NSString stringWithFormat:@"%d: %@, %@, %@, %d, %@, %@, %@",
-                    [self getUniqueID],
+                [self getUniqueID],
                [self getTitle],
                [[self getStart] description],
                [self getDurationAsString],
