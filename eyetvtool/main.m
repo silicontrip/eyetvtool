@@ -36,7 +36,9 @@ void usage()
     printf ("-p --repeats <days>              Set the repeats of the program\n");
     printf ("             [None|Sund|Mond|Tues|Wedn|Thur|Frid|Satu|Week|Wknd|Dail] comma separated for multiple days\n");
     printf ("-C --channel <channel>           Set the channel number of the program\n");
-    
+    printf ("\nExporting:\n");
+    printf ("-o --outdir <directory>          Select the output directory for export (defaults to current directory)\n");
+
 }
 
 int main(int argc, const char * argv[])
@@ -66,7 +68,9 @@ int main(int argc, const char * argv[])
         NSString *set_duration = [newargs optionForShortKey:@"l" LongKey:@"length"];
         NSString *set_repeats = [newargs optionForShortKey:@"p" LongKey:@"repeats"];
         NSString *set_channel = [newargs optionForShortKey:@"C" LongKey:@"channel"];
+        NSString *set_out = [newargs optionForShortKey:@"o" LongKey:@"outdir"];
         NSString *set_start = [newargs optionForShortKey:@"s" LongKey:@"start"];
+
         
         if ([newargs hasArgument:@"n"] || [newargs hasArgument:@"new"]) {
             
@@ -135,18 +139,24 @@ int main(int argc, const char * argv[])
                             NSDateFormatter *format = [[NSDateFormatter alloc] init];
                             [format setDateFormat:@"yyyy-MM-dd"];
                             
-                            // TODO: find a better way (NSFoundation way) to get current directory
-                            char buf[1024]; getcwd(buf, 1024);
+                            
+                            if (set_out == nil) {
+                                // TODO: find a better way (NSFoundation way) to get current directory
+                                char buf[1024];
+                                set_out = [NSString stringWithUTF8String:getcwd(buf, 1024)];
+                            }
                             
                             // TODO:  make output directory option
                             NSString *path = [NSString stringWithFormat:@"%@/%@_%@_%d.mpg",
-                                              [NSString stringWithUTF8String:buf],
+                                              set_out,
                                               [[rec getTitle] stringByReplacingOccurrencesOfString:@" " withString:@"_"],
                                               [format stringFromDate:[rec getActualStart]],
                                               [rec getUniqueID]];
                             
                             [format release];
                             
+                            NSLog(@"Exporting To: %@",path);
+
                             [rec exportToPath:path withFormat:'MPEG'];
                             //  NSLog(@"exportToPath:%@ ",path);
                             

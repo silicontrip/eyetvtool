@@ -533,10 +533,8 @@
     [df release];
 }
 
-// TODO: DEBUG why this does not work.
 -(void)setRepeatsWithString:(NSString *)rpt
 {
-    
     
     NSEnumerator *e = [[rpt componentsSeparatedByString:@","] objectEnumerator];
     
@@ -546,9 +544,7 @@
     while (object = [e nextObject]) {
         [repeats insertDescriptor:[NSAppleEventDescriptor descriptorWithEnumCode:[self stringToRepeat:object]] atIndex:0];
     }
-    
-    NSLog(@"repeats %@",repeats);
-    
+        
     [self setProp:'Rpts' value:repeats];
 
 }
