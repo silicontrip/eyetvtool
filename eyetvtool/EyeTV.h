@@ -79,6 +79,7 @@ typedef enum EyeTVRpts EyeTVRpts;
 - (NSString *)getRepeatsAsString;
 - (BOOL)getEnabled;
 - (NSString *)getEnabledAsString;
+- (NSString *)getLocation;
 
 
 - (void)setProp:(OSType)prop value:(NSAppleEventDescriptor *)val;

@@ -446,6 +446,12 @@
         return @"DISABLED";
 }
 
+// might be able to determine export size from this.
+- (NSString *)getLocation
+{
+    return [[self sendQuery:'pURL'] stringValue];
+}
+
 // pragma: mark
 
 - (void)setProp:(OSType)prop value:(NSAppleEventDescriptor *)val

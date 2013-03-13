@@ -134,6 +134,8 @@ int main(int argc, const char * argv[])
                         
                         printf("%s\n",[[rec description]UTF8String]);
                         
+                       // [rec getLocation];
+                        
                         if (action_export)
                         {
                             NSDateFormatter *format = [[NSDateFormatter alloc] init];
