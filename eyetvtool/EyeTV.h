@@ -31,11 +31,13 @@ typedef enum EyeTVRpts EyeTVRpts;
     NSAppleEventDescriptor *uniqueID;
     NSAppleEventDescriptor *type;
     NSAppleEventDescriptor *eyetv;
+    NSAppleEventDescriptor *eyetvObject;
 }
 
 - (NSAppleEventDescriptor *)getType;
 - (NSAppleEventDescriptor *)getApplication;
 - (NSAppleEventDescriptor *)getID;
+- (NSAppleEventDescriptor *)currentObject;
 
 
 - (NSAppleEventDescriptor *)makeQuery:(OSType)seld;
@@ -88,6 +90,7 @@ typedef enum EyeTVRpts EyeTVRpts;
 - (void)setEnabled;
 - (void)setDisabled;
 
+- (void)exportToPath:(NSString *)path withFormat:(OSType)format;
 - (void)remove;
 
 - (void)setInteraction:(OSType)i;

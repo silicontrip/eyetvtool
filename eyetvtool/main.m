@@ -68,9 +68,6 @@ int main(int argc, const char * argv[])
         NSString *set_channel = [newargs optionForShortKey:@"C" LongKey:@"channel"];
         NSString *set_start = [newargs optionForShortKey:@"s" LongKey:@"start"];
         
-        
-        
-        
         if ([newargs hasArgument:@"n"] || [newargs hasArgument:@"new"]) {
             
             NSLog(@"NEW Program");
@@ -94,7 +91,9 @@ int main(int argc, const char * argv[])
             
             if (set_enabled)
                 [rec setEnabled];
-                        
+            
+            
+            
             if (set_channel!=nil)
                 [rec setChannelNumber:[set_channel integerValue]];
 
@@ -124,7 +123,8 @@ int main(int argc, const char * argv[])
             if (![newargs hasArgument:@"P"] && ![newargs hasArgument:@"programs"]) {
                 
                 NSLog(@"RECORDINGS");
-                
+                printf("\n");
+
                 NSEnumerator *e = [[EyeTV getRecordingList] objectEnumerator];
                 id object;
                 while (object = [e nextObject]) {
@@ -146,6 +146,28 @@ int main(int argc, const char * argv[])
                         if (action_export)
                         {
                             // export me baby
+                            
+                            
+                            // format date
+                            
+                            NSDateFormatter *format = [[NSDateFormatter alloc] init];
+                            [format setDateFormat:@"yyyy-MM-dd"];
+                            
+                            char buf[1024];
+                            
+                            getcwd(buf, 1024);
+                            
+                            NSString *path = [NSString stringWithFormat:@"%@/%@_%@_%d.mpg",
+                                             [NSString stringWithUTF8String:buf],
+                                             [[rec getTitle] stringByReplacingOccurrencesOfString:@" " withString:@"_"],
+                                             [format stringFromDate:[rec getActualStart]],
+                                             [rec getUniqueID]];
+                            
+                            [format release];
+                            
+                          [rec exportToPath:path withFormat:'MPEG'];
+                          //  NSLog(@"exportToPath:%@ ",path);
+                            
                         }
                         if (action_remove)
                             [rec remove];
@@ -157,8 +179,10 @@ int main(int argc, const char * argv[])
             }
             if (![newargs hasArgument:@"R"] && ![newargs hasArgument:@"recordings"]) {
                 
+                printf("\n");
                 NSLog(@"PROGRAMS");
-                
+                printf("\n");
+
                 NSEnumerator *e = [[EyeTV getProgramList] objectEnumerator];
                 id object;
                 while (object = [e nextObject]) {
@@ -204,6 +228,9 @@ int main(int argc, const char * argv[])
                                    [[rec getRepeatsAsString] UTF8String],
                                    [rec getEnabled]
                                 );
+                            
+                            if (action_export)
+                                [rec export];
                             
                             if (action_remove)
                                 [rec remove];
