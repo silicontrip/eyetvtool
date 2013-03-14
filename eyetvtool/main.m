@@ -136,6 +136,7 @@ int main(int argc, const char * argv[])
                         
                        // [rec getLocation];
                         
+                        
                         if (action_export)
                         {
                             NSDateFormatter *format = [[NSDateFormatter alloc] init];
@@ -143,12 +144,12 @@ int main(int argc, const char * argv[])
                             
                             
                             if (set_out == nil) {
-                                // TODO: find a better way (NSFoundation way) to get current directory
-                                char buf[1024];
-                                set_out = [NSString stringWithUTF8String:getcwd(buf, 1024)];
+                                NSFileManager *filemgr = [[NSFileManager alloc] init];
+                                set_out = [filemgr currentDirectoryPath];
+                                [filemgr release];
                             }
                             
-                            // TODO:  make output directory option
+                            
                             NSString *path = [NSString stringWithFormat:@"%@/%@_%@_%d.mpg",
                                               set_out,
                                               [[rec getTitle] stringByReplacingOccurrencesOfString:@" " withString:@"_"],
