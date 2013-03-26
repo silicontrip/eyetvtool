@@ -41,11 +41,12 @@ void usage()
 
 }
 
+NSAutoReleasePool *pool;
+
 int main(int argc, const char * argv[])
 {
     
-    @autoreleasepool {
-        
+    pool = [[NSAutoreleasePool alloc] init];
         Arguments *newargs = [Arguments argumentsWithNSProcessInfoArguments:[[NSProcessInfo processInfo] arguments]];
         
         if([newargs hasArgument:@"help"] || [newargs hasArgument:@"h"])
@@ -226,7 +227,7 @@ int main(int argc, const char * argv[])
                 
             }
         }
-    }
+    [pool release];
     return 0;
 }
 
