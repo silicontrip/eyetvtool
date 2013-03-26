@@ -41,7 +41,7 @@ void usage()
 
 }
 
-NSAutoReleasePool *pool;
+NSAutoreleasePool *pool;
 
 int main(int argc, const char * argv[])
 {
