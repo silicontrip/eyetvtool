@@ -49,6 +49,7 @@ typedef enum EyeTVRpts EyeTVRpts;
 
 + (id)program;
 - (id)initProgram;
+- (id)initWithID:(NSAppleEventDescriptor *)uniq type:(OSType)t;
 
 - (id)initProgramWithID:(NSAppleEventDescriptor *)uniq;
 + (id)programWithID:(NSAppleEventDescriptor *)uniq;
